@@ -1,48 +1,50 @@
 # GitChess
 
+**English** | [한국어](README.ko.md)
+
 *Play chess together through GitHub Issues.*
 
-GitHub 이슈와 Actions만으로 운영하는 커뮤니티 체스 프로젝트입니다. 자신의 저장소에 설치하면 참가자가 이동 링크로 이슈를 만들고, 봇이 수를 검증해 README의 체스판을 갱신합니다. 별도 서버나 API 키는 필요하지 않습니다.
+GitChess is a community chess project powered entirely by GitHub Issues and Actions. Install it in your own repository, and participants can submit moves through issue links. The bot validates each move and updates the chessboard in your README. No separate server or API key is required.
 
-**배포 기본값은 비활성화입니다.** 저장소 관리자가 `CHESS_ENABLED=true`를 설정해야 체스 워크플로가 실행됩니다.
+**Disabled by default.** The repository administrator must set `CHESS_ENABLED=true` before the chess workflow can run.
 
-## 빠른 시작
+## Quick start
 
-1. **Use this template → Create a new repository**로 자신의 저장소를 만듭니다. **Fork**하거나 코드를 복사해도 됩니다. 저장소 이름은 자유롭게 정할 수 있습니다.
-2. **Settings → General → Features → Issues**를 활성화합니다.
-3. **Settings → Actions → General**에서 GitHub Actions를 허용합니다. Fork한 경우 **Actions** 탭에서도 워크플로를 활성화하세요. 체스 워크플로는 `GITHUB_TOKEN`의 콘텐츠·이슈 쓰기 권한을 요청합니다.
-4. **Settings → Secrets and variables → Actions → Variables**에 저장소 변수를 추가합니다.
+1. Choose **Use this template → Create a new repository** to create your own repository. You can also **Fork** this repository or copy the code. Any repository name works.
+2. Enable **Settings → General → Features → Issues**.
+3. Allow GitHub Actions under **Settings → Actions → General**. If you forked the repository, also enable workflows in the **Actions** tab. The chess workflow requests permission to write repository contents and issues using `GITHUB_TOKEN`.
+4. Add a repository variable under **Settings → Secrets and variables → Actions → Variables**:
 
-   | 이름 | 값 |
+   | Name | Value |
    | :--- | :--- |
    | `CHESS_ENABLED` | `true` |
 
-5. **Actions → GitChess → Run workflow**에서 기본 브랜치와 `new-game`을 선택해 실행합니다.
-6. 실행이 끝나면 README를 새로고침합니다. 체스판과 이동 링크가 **자신의 저장소 주소**로 생성됩니다.
+5. Open **Actions → GitChess → Run workflow**, select the default branch, and choose `new-game`.
+6. Once the workflow finishes, refresh the README. The chessboard and move links will point to **your own repository**.
 
-브랜치 보호 규칙을 사용하는 저장소에서는 봇이 대국 상태를 커밋·푸시할 수 있어야 합니다. 조직 정책으로 쓰기 권한이 제한된 경우 저장소 관리자가 해당 권한을 허용해야 합니다.
+If you use branch protection rules, allow the bot to commit and push game updates. If your organization restricts write permissions, a repository administrator must allow the required permissions.
 
-운영을 중지하려면 `CHESS_ENABLED` 변수를 삭제하거나 값을 `false`로 바꾸세요. 새 이슈와 수동 실행 모두 체스 작업을 건너뜁니다.
+To stop the bot, delete the `CHESS_ENABLED` variable or set it to `false`. The chess job will be skipped for both new issues and manual runs.
 
-## 체스판
+## Chessboard
 
-현재 상태: **<!-- BEGIN TURN -->설정 전<!-- END TURN -->**
+Current status: **<!-- BEGIN TURN -->not configured<!-- END TURN -->**
 
-`white`: 백 차례 · `black`: 흑 차례 · `game over`: 종료
+`white`: White to move · `black`: Black to move · `game over`: Game finished
 
 <table>
 <tr>
 <td valign="top">
 
 <!-- BEGIN CHESS BOARD -->
-빠른 시작을 완료하면 체스판이 표시됩니다.
+The chessboard will appear once you complete the quick start.
 <!-- END CHESS BOARD -->
 
 </td>
 <td valign="top">
 
 <!-- BEGIN MOVES LIST -->
-새 게임을 시작하면 합법적인 이동 목록이 생성됩니다.
+Start a new game to generate the list of legal moves.
 <!-- END MOVES LIST -->
 
 </td>
@@ -50,73 +52,74 @@ GitHub 이슈와 Actions만으로 운영하는 커뮤니티 체스 프로젝트�
 </table>
 
 <!-- BEGIN GAME ACTIONS -->
-초기 설정은 **Actions → GitChess → Run workflow → new-game**에서 진행하세요.
+For initial setup, use **Actions → GitChess → Run workflow → new-game**.
 <!-- END GAME ACTIONS -->
 
-## 플레이 방법
+## How to play
 
-1. 체스판 옆 이동 목록에서 출발 칸(`FROM`)과 도착 칸(`TO`)을 고릅니다.
-2. 도착 칸 링크를 클릭하고, 이슈 제목을 바꾸지 않은 채 제출합니다.
-3. 봇이 이슈에 결과를 남기고 닫습니다. Actions 실행이 끝나면 README를 새로고침하세요.
+1. In the move list beside the board, choose a starting square (`FROM`) and a destination (`TO`).
+2. Click the destination link and submit the issue without changing its title.
+3. The bot posts the result and closes the issue. Refresh the README after the workflow finishes.
 
-- 참가자별 백·흑 배정은 없으며, 현재 차례의 기물을 누구나 움직일 수 있습니다.
-- 같은 사용자가 두 번 연속으로 둘 수 없습니다.
-- 합법적인 수만 허용됩니다. 캐슬링과 앙파상을 지원하며, 폰은 자동으로 퀸으로 승격합니다.
-- 대국 종료 후에는 누구나 새 게임을 시작할 수 있습니다. 진행 중인 대국을 초기화할 수 있는 사람은 저장소 소유자입니다.
-- 공개 저장소에서는 이슈를 만들 수 있는 사람이 참여할 수 있습니다. 비공개 저장소에서는 접근 권한이 있는 사용자끼리 플레이합니다.
+- Players are not assigned a color. Anyone can move a piece belonging to the side whose turn it is.
+- The same user cannot play two consecutive turns.
+- Only legal moves are allowed. Castling and en passant are supported; pawns are automatically promoted to queens.
+- Anyone can start a new game after the current game ends. Only the repository owner can reset a game in progress.
+- In a public repository, anyone who can open issues can participate. In a private repository, players need access to the repository.
 
-직접 이슈를 만들 때 사용하는 제목:
+To create an issue manually, use these titles:
 
 ```text
 Chess: Move E2 to E4
 Chess: Start new game
 ```
 
-## 대국 관리
+## Managing games
 
-**Actions → GitChess → Run workflow**에서 다음 작업을 선택할 수 있습니다.
+Select one of the following actions under **Actions → GitChess → Run workflow**:
 
-| 작업 | 동작 |
+| Action | Behavior |
 | :--- | :--- |
-| `new-game` | 시작 배치로 초기화. 이동 기록은 초기화하고 참가자별 누적 이동 수는 유지 |
-| `refresh` | 기존 대국을 유지하면서 체스판과 이슈 링크 갱신. 저장소 이름 변경 후 사용 |
+| `new-game` | Reset the board and move history while keeping each participant's cumulative move count |
+| `refresh` | Regenerate the board and issue links without changing the game. Use this after renaming your repository |
 
-배포 소스에는 개인 대국 데이터가 포함되어 있지 않습니다. 처음 설치할 때는 `new-game`으로 시작하세요.
+The distributed source does not include personal game data. Choose `new-game` when setting up a fresh installation.
 
-## 로컬 실행 및 개발
+## Local usage and development
 
-Python 3.12 이상과 [uv](https://docs.astral.sh/uv/)가 필요합니다. `chess` 의존성은 스크립트 실행 시 자동으로 설치됩니다.
+You need Python 3.12 or later and [uv](https://docs.astral.sh/uv/). The script automatically installs its `chess` dependency when it runs.
 
 ```sh
-# 새 게임 시작: OWNER는 저장소 소유자의 GitHub 사용자명
+# Start a new game: OWNER is the repository owner's GitHub username
 uv run play.py seed OWNER OWNER/REPO
 
-# 기존 대국을 유지하면서 README와 체스판 갱신
+# Refresh the READMEs and board without changing the current game
 uv run play.py refresh OWNER/REPO
 
-# 이슈 처리와 동일한 방식으로 한 수 두기
+# Play a move using the same logic as issue processing
 uv run play.py play "Chess: Move E2 to E4" PLAYER OWNER OWNER/REPO
 
-# 테스트
+# Run tests
 uv run --with chess python -m unittest discover -s tests -v
 ```
 
-로컬 명령은 `CHESS_ENABLED`와 관계없이 명시적으로 실행되며, 대국 상태·README·SVG를 갱신합니다. 실행 결과는 표준 출력과 `/tmp/chess-result.json`에 JSON으로 기록됩니다.
+Local commands run explicitly regardless of `CHESS_ENABLED` and update the game state, READMEs, and SVG. Results are written as JSON to standard output and `/tmp/chess-result.json`.
 
-## 구성
+## Project structure
 
-| 경로 | 역할 |
+| Path | Purpose |
 | :--- | :--- |
-| `play.py` | 이슈 명령 처리, 체스 규칙 검증, README·SVG 생성 |
-| `data/game.json` | 설치 후 생성되는 현재 배치(FEN), 이동 기록, 누적 이동 수 |
-| `board-*.svg` | 설치 후 생성되는 체스판 이미지 |
-| `.github/workflows/chess.yml` | 활성화된 저장소에서 이슈 및 수동 실행 처리 |
-| `tests/` | 초기 설정·대국·렌더링 회귀 테스트 |
+| `play.py` | Process issue commands, validate chess moves, and generate READMEs and SVGs |
+| `README.md` / `README.ko.md` | English and Korean documentation with synchronized chessboards |
+| `data/game.json` | Board position (FEN), move history, and cumulative move counts, generated after setup |
+| `board-*.svg` | Chessboard image, generated after setup |
+| `.github/workflows/chess.yml` | Process issues and manual runs in enabled repositories |
+| `tests/` | Regression tests for setup, gameplay, and rendering |
 
-체스판·이동 목록·차례·새 게임 링크는 README의 `BEGIN` / `END` 주석 사이에서 자동 생성됩니다. README를 편집할 때 이 주석을 유지하세요.
+The chessboard, move list, turn, and new-game link are generated between the README's `BEGIN` / `END` comments. Keep these markers when editing either README. Both language versions are updated together.
 
-버그 제보와 개선 제안은 이슈로, 코드 변경은 Pull Request로 보내주세요. 변경 후 위 테스트 명령으로 검증할 수 있습니다.
+Please use issues for bug reports and suggestions, and Pull Requests for code changes. Run the test command above to verify your changes.
 
-## 라이선스
+## License
 
 [MIT License](LICENSE)

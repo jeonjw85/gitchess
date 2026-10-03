@@ -82,10 +82,15 @@ def _run() -> dict[str, bool | str]:
         raise SystemExit(f"unknown command: {cmd}")
     if result.game is not None:
         save(result.game)
-        README_PATH.write_text(
-            render(README_PATH.read_text(encoding="utf-8"), result.game, repo),
-            encoding="utf-8",
-        )
+        readmes = [(README_PATH, "Start a new game")]
+        korean_readme = ROOT / "README.ko.md"
+        if korean_readme.exists():
+            readmes.append((korean_readme, "새 게임 시작"))
+        for path, label in readmes:
+            path.write_text(
+                render(path.read_text(encoding="utf-8"), result.game, repo, label),
+                encoding="utf-8",
+            )
     return {"ok": result.ok, "comment": result.comment}
 
 
@@ -147,13 +152,13 @@ def save(game: Game) -> None:
     GAME_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def render(readme: str, game: Game, repo: str) -> str:
+def render(readme: str, game: Game, repo: str, new_game_label: str = "Start a new game") -> str:
     board = chess.Board(game.fen)
     sections = {
         "board": _board(board, game.history),
         "moves": _moves(board, repo),
         "turn": "game over" if board.is_game_over() else ("white" if board.turn else "black"),
-        "actions": f"[새 게임 시작]({_link(repo, 'Chess: Start new game')})",
+        "actions": f"[{new_game_label}]({_link(repo, 'Chess: Start new game')})",
     }
     text = readme
     for key, begin, end, inline in MARKERS:

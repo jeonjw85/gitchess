@@ -16,6 +16,10 @@ class ProjectTests(unittest.TestCase):
         self.root = Path(temporary.name)
         self.readme = self.root / "README.md"
         self.readme.write_text(play.README_PATH.read_text(encoding="utf-8"), encoding="utf-8")
+        self.korean_readme = self.root / "README.ko.md"
+        self.korean_readme.write_text(
+            (play.ROOT / "README.ko.md").read_text(encoding="utf-8"), encoding="utf-8"
+        )
         for name, value in (
             ("ROOT", self.root),
             ("GAME_PATH", self.root / "data" / "game.json"),
@@ -49,8 +53,8 @@ class ProjectTests(unittest.TestCase):
         readme = self.readme.read_text(encoding="utf-8")
         self.assertIn("https://github.com/owner/issue-chess/issues/new", readme)
         self.assertIn("<!-- BEGIN TURN -->white<!-- END TURN -->", readme)
-        self.assertNotIn("<!-- BEGIN TURN -->설정 전<!-- END TURN -->", readme)
-        self.assertIn("[새 게임 시작](https://github.com/owner/issue-chess/", readme)
+        self.assertNotIn("<!-- BEGIN TURN -->not configured<!-- END TURN -->", readme)
+        self.assertIn("[Start a new game](https://github.com/owner/issue-chess/", readme)
         self.assertEqual(len(list(self.root.glob("board-*.svg"))), 1)
 
     def test_refresh_preserves_game_and_updates_all_issue_links(self):
@@ -67,13 +71,38 @@ class ProjectTests(unittest.TestCase):
         self.assertIn("https://github.com/another-owner/renamed-chess/issues/new", readme)
         self.assertNotIn("https://github.com/owner/issue-chess/issues/new", readme)
         self.assertNotIn("https://github.com/jeonjw85/jeonjw85/issues/new", readme)
-        self.assertIn("[새 게임 시작](https://github.com/another-owner/renamed-chess/", readme)
+        self.assertIn("[Start a new game](https://github.com/another-owner/renamed-chess/", readme)
         self.assertIn("<!-- BEGIN TURN -->white<!-- END TURN -->", readme)
         self.assertIn("# GitChess", readme)
         boards = list(self.root.glob("board-*.svg"))
         self.assertEqual(len(boards), 1)
         self.assertIn(boards[0].name, readme)
         self.assertIn("<svg", boards[0].read_text(encoding="utf-8"))
+
+    def test_both_readmes_update_with_localized_links(self):
+        self.start_game()
+        self.move("Chess: Move E2 to E4", "alice")
+        self.run_command("refresh", "another-owner/gitchess")
+
+        english = self.readme.read_text(encoding="utf-8")
+        korean = self.korean_readme.read_text(encoding="utf-8")
+        self.assertIn("[Start a new game]", english)
+        self.assertNotIn("[새 게임 시작]", english)
+        self.assertIn("[새 게임 시작]", korean)
+        self.assertIn("[한국어](README.ko.md)", english)
+        self.assertIn("[English](README.md)", korean)
+        board_path = next(self.root.glob("board-*.svg"))
+        for readme in (english, korean):
+            self.assertIn("<!-- BEGIN TURN -->black<!-- END TURN -->", readme)
+            self.assertIn("https://github.com/another-owner/gitchess/issues/new", readme)
+            self.assertNotIn("https://github.com/owner/issue-chess/issues/new", readme)
+            self.assertIn(board_path.name, readme)
+
+    def test_english_readme_can_run_without_korean_translation(self):
+        self.korean_readme.unlink()
+
+        self.assertTrue(self.start_game()["ok"])
+        self.assertIn("[Start a new game]", self.readme.read_text(encoding="utf-8"))
 
     def test_refresh_without_game_leaves_readme_untouched(self):
         original_readme = self.readme.read_bytes()
